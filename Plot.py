@@ -5,7 +5,7 @@ from matplotlib.animation import FuncAnimation
 from collections import deque
 
 # 设置串行端口
-ser = serial.Serial('/dev/ttyACM0', 9600)  # 根据实际情况调整端口
+ser = serial.Serial('/dev/ttyUSB0', 9600)  # 根据实际情况调整端口
 
 # 定义激光传感器的数量
 NUM_SENSORS = 24
@@ -25,10 +25,14 @@ broken_sensors = []
 def read_arduino_data():
     data = ser.readline().decode('utf-8').strip()
     if data:
-        laser_data, distance_data = data.split(';')
-        laser_states = list(map(int, laser_data.split(',')))
-        distances = list(map(int, distance_data.split(',')))
-        return laser_states, distances
+        try:
+            laser_data, distance_data = data.split(';')
+            laser_states = list(map(int, filter(None, laser_data.split(','))))
+            distances = list(map(int, filter(None, distance_data.split(','))))
+            return laser_states, distances
+        except ValueError as e:
+            print(f"Error parsing data: {data}")
+            print(e)
     return None, None
 
 
