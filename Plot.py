@@ -29,7 +29,10 @@ def read_arduino_data():
             laser_data, distance_data = data.split(';')
             laser_states = list(map(int, filter(None, laser_data.split(','))))
             distances = list(map(int, filter(None, distance_data.split(','))))
-            return laser_states, distances
+            if len(laser_states) == NUM_SENSORS and len(distances) == 4:
+                return laser_states, distances
+            else:
+                print(f"Data length mismatch: {data}")
         except ValueError as e:
             print(f"Error parsing data: {data}")
             print(e)
