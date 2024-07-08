@@ -5,7 +5,7 @@ from matplotlib.animation import FuncAnimation
 from collections import deque
 
 # 设置串行端口
-ser = serial.Serial('/dev/ttyUSB0', 9600)  # 根据实际情况调整端口
+ser = serial.Serial('/dev/ttyCAM0', 9600)  # 根据实际情况调整端口
 
 # 定义激光传感器的数量
 NUM_SENSORS = 24
@@ -23,19 +23,27 @@ broken_sensors = []
 
 
 def read_arduino_data():
-    data = ser.readline().decode('utf-8').strip()
+    data = ser.readline().decode('utf-8', errors='ignore').strip()
     if data:
-        try:
-            laser_data, distance_data = data.split(';')
-            laser_states = list(map(int, filter(None, laser_data.split(','))))
-            distances = list(map(int, filter(None, distance_data.split(','))))
-            if len(laser_states) == NUM_SENSORS and len(distances) == 4:
-                return laser_states, distances
-            else:
-                print(f"Data length mismatch: {data}")
-        except ValueError as e:
-            print(f"Error parsing data: {data}")
-            print(e)
+        print(f"Received data: {data}")  # 添加调试信息
+        if ';' in data:
+            try:
+                parts = data.split(';')
+                if len(parts) == 2:
+                    laser_data, distance_data = parts
+                    laser_states = list(map(int, filter(None, laser_data.split(','))))
+                    distances = list(map(int, filter(None, distance_data.split(','))))
+                    if len(laser_states) == NUM_SENSORS and len(distances) == 4:
+                        return laser_states, distances
+                    else:
+                        print(f"Data length mismatch: {data}")
+                else:
+                    print(f"Invalid data format (expected 2 parts, got {len(parts)}): {data}")
+            except ValueError as e:
+                print(f"Error parsing data: {data}")
+                print(e)
+        else:
+            print(f"Invalid data format (missing ';'): {data}")
     return None, None
 
 
