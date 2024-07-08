@@ -5,7 +5,7 @@ from matplotlib.animation import FuncAnimation
 from collections import deque
 
 # 设置串行端口
-ser = serial.Serial('/dev/ttyACM0', 9600)  # 根据实际情况调整端口
+ser = serial.Serial('/dev/ttyUSB0', 9600)  # 根据实际情况调整端口
 
 # 定义激光传感器的数量
 NUM_SENSORS = 24
@@ -91,7 +91,6 @@ def update(frame):
     laser_states, distances = read_arduino_data()
     if laser_states is not None and distances is not None:
         update_queues(laser_states, distances)
-
     plot_laser_harp(ax1)
 
 
